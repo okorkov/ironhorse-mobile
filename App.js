@@ -1,6 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, SafeAreaView, Button, TextInput } from 'react-native';
+import axios from 'axios';
+import HomePage from './components/HomePage.jsx'
 
 
 export default function App() {
@@ -9,7 +11,23 @@ export default function App() {
   const [password, onChangePassword] = React.useState(null);
   const [loggedIn, onChangeLoggedIn] = React.useState(false);
 
+  const handleLogin = () => {
+    axios.post('http://127.0.0.1:3000/authenticate', {
+      email,
+      password
+    }).then(data => {
+      if (data.data.status == 'success') {
+        onChangeLoggedIn(true)
+      } else if (data.data.error) {
+        alert(data.data.error)
+      }
+    })
+  }
+
   return (
+    (loggedIn)?
+    <HomePage />
+    :
     <SafeAreaView style={styles.container}>
       <Text style={styles.text}>Log in to manage Ironhorsestudio.net</Text>
         <TextInput
@@ -25,7 +43,7 @@ export default function App() {
       <Button
         title="Log In"
         color="#f194ff"
-        onPress={() => alert('Button with adjusted color pressed')}
+        onPress={handleLogin}
       />
       <StatusBar style="auto" />
     </SafeAreaView>
