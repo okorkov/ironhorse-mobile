@@ -1,53 +1,49 @@
-import { StatusBar } from 'expo-status-bar';
+
 import React from 'react';
-import { StyleSheet, Text, SafeAreaView, Button, TextInput } from 'react-native';
-import axios from 'axios';
-import HomePage from './components/HomePage.jsx'
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Linking,
+  Dimensions,
+  SafeAreaView
+} from "react-native";
+import { WebView } from 'react-native-webview'
+import Constants from 'expo-constants';
+
+const { height, width } = Dimensions.get("window");
+const testURI = "https://www.ironspringsroad.com/";
 
 
 export default function App() {
 
-  const [email, onChangeEmail] = React.useState("charles@ironhorsestudio.net");
-  const [password, onChangePassword] = React.useState(null);
-  const [loggedIn, onChangeLoggedIn] = React.useState(false);
-
-  const handleLogin = () => {
-    axios.post('http://127.0.0.1:3000/authenticate', {
-      email,
-      password
-    }).then(data => {
-      if (data.data.status == 'success') {
-        onChangeLoggedIn(true)
-      } else if (data.data.error) {
-        alert(data.data.error)
-      }
-    })
-  }
+  const [showWebView, setShowWebview] = React.useState(false);
 
   return (
-    (loggedIn)?
-    <HomePage />
-    :
+
     <SafeAreaView style={styles.container}>
-      <Text style={styles.text}>Log in to manage Ironhorsestudio.net</Text>
-        <TextInput
-        style={styles.input}
-        onChangeText={onChangeEmail}
-        value={email}
-      />
-      <TextInput
-        style={styles.input}
-        onChangeText={onChangePassword}
-        value={password}
-      />
-      <Button
-        title="Log In"
-        color="#f194ff"
-        onPress={handleLogin}
-      />
-      <StatusBar style="auto" />
+        <WebView
+          style={{ flex: 1, height: height, width: width }}
+          containerStyle={{ flex: 1, height: height, width: width }}
+          
+          source={{ uri: testURI }}
+          renderError={(error) => (
+            <View style={{ flex: 1 }}><Text>{error}</Text></View>
+          )}
+          onError={syntheticEvent => {
+            const { nativeEvent } = syntheticEvent;
+            console.warn('WebView error: ', nativeEvent);
+          }}
+          onNavigatorStateChange={(event) => {
+            if (event.url !== testURI) {
+              this.webview.stopLoading();
+              Linking.openURL(event.url);
+            }
+          }}
+        />
     </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -56,13 +52,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  text: {
-    color: 'black',
-  },input: {
-    height: 40,
-    width: '80%',
-    margin: 12,
-    borderWidth: 1,
   },
 });
